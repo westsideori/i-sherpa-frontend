@@ -10,11 +10,11 @@
 <body>
     
     <div class="topnav">
-        <a class="left-nav-items" href="">iSherpa</a>
-        <a class="left-nav-items" href="">Write A Guide</a>
-        <a class="left-nav-items" href="">How It Works</a>
-        <a class="right-nav-items" href="">Sign Up</a>
-        <a class="right-nav-items" href="">Login</a>
+        <a id="home" class="left-nav-items" href="">iSherpa</a>
+        <a id="write-guide" class="left-nav-items" href="">Write A Guide</a>
+        <a id="how-it-works" class="left-nav-items" href="">How It Works</a>
+        <a id="sign-up" class="right-nav-items" href="">Sign Up</a>
+        <a id="login" class="right-nav-items" href="">Login</a>
     </div>
     <br>
     <div class="flex-container" id="main-box">
@@ -29,7 +29,7 @@
         <div class="card"></div>
         <div class="card"></div>
         <div class="card"></div> -->
-        <div class="show">
+        <!-- <div class="show">
             <img class="show-image">
             <h1>Title</h1>
             <h2>Author</h2>
@@ -41,11 +41,20 @@
                 <button>Like</button>
             </div>
             <div class="comment-area">
-                
+                <h3>Comments:</h3>
+                <ul id="comments">
+
+                </ul>
+                <br>
+                <button>Comment</button>
+                <form id="new-comment-form" style="display: block;">
+                    <input type="text" name="comment" id="comment" placeholder="New Comment"><br>
+                    <input type="submit" value="Add Comment">
+                </form>
             </div>
         
 
-        </div>
+        </div> -->
         
     </div>
       
