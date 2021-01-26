@@ -3,8 +3,8 @@ const mainBox = document.getElementById("main-box")
 const navBar = document.querySelector(".topnav")
 
 //Session Variables
-let selectedUser = {}
-let selectedGuide = {}
+let selectedUser = ""
+let selectedGuide = ""
 
 //Fetches
 const getUsers = (id) => {
@@ -38,6 +38,49 @@ const signupUser = (newUserObj) => {
         .then(resp => resp.json())
 }
 
+const editUser = (id, editedUserObj) => {
+    return fetch(`http://localhost:3000/users/${id}`, {
+        method: 'PATCH',
+        headers: {
+            "Content-Type": "application/json"
+            
+        },
+        body: JSON.stringify(editedUserObj)
+    })
+        .then(resp => resp.json())
+}
+
+const createGuide = (newGuideObj) => {
+    return fetch(`http://localhost:3000/guides`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newGuideObj)
+    })
+    .then(resp => resp.json())
+}
+
+const editGuide = (id, editedGuideObj) => {
+    return fetch(`http://localhost:3000/guides/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editedGuideObj)
+    })
+        .then(resp => resp.json())
+}
+
+
+
+const deleteGuide = (id) => {
+    return fetch(`http://localhost:3000/guides/${id}`, {
+        method: 'DELETE'
+    })
+        .then(resp => resp.json())
+}
+
 //Event Listener
 document.addEventListener("DOMContentLoaded", function() {
     navBar.querySelector("#home").classList.add("active")
@@ -60,10 +103,18 @@ navBar.addEventListener("click", function (e) {
             })
     } else if (e.target.id === "write-guide") {
         e.preventDefault()
-        document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-        document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-        e.target.classList.add("active")
-        console.log("Wrote a Guide!")
+        if (!selectedUser) {
+            // document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
+            // document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
+            // e.target.classList.add("active")
+            window.alert("Login or Sign Up to Post a Guide")
+            renderLoginPage()
+        } else {
+            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
+            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
+            e.target.classList.add("active")
+            renderNewGuideForm()
+        }
     } else if (e.target.id === "how-it-works") {
         e.preventDefault()
         document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
@@ -134,14 +185,10 @@ const loginUser = (username) => {
 }
 
 const logoutUser = () => {
-    selectedUser = {}
+    selectedUser = ""
     navBar.querySelector("#sign-up").innerText = `Sign Up`
     navBar.querySelector("#login").innerText = "Login"
 }
-
-
-
-
 
 
 //Renders
@@ -265,7 +312,8 @@ const renderUserPage = (selectedUser) => {
     const editButton = document.createElement("button")
     editButton.innerText = "Edit"
     editButton.addEventListener("click", function() {
-        console.log("Edit!")
+        mainBox.innerHTML = null
+        renderEditUserPage()
     })
     const deleteButton = document.createElement("button")
     deleteButton.innerText = "Delete"
@@ -287,14 +335,30 @@ const renderUserPage = (selectedUser) => {
                 const userGuideCard = document.createElement("div")
                 userGuideCard.className = "user-card"
                 const title = document.createElement("h2")
-                const author = document.createElement("h3")
+                const editGuideButton = document.createElement("button")
+                editGuideButton.innerText = "Edit"
+                editGuideButton.id = "edit-guide-button"
+                const deleteGuideButton = document.createElement("button")
+                deleteGuideButton.innerText = "Delete"
+                deleteGuideButton.id = "delete-guide-button"
                 title.innerText = guide.title
                 userGuideCard.dataset.id = guide.id
-                userGuideCard.addEventListener("click", function() {
-                    selectedGuide = guide
-                    renderGuideShow(guide)
+                userGuideCard.addEventListener("click", function(e) {
+                    if (e.target.id === "edit-guide-button" ){
+                        selectedGuide = guide
+                        navBar.querySelector("#login").classList.remove(".active")
+                        renderEditGuideForm()
+                    } else if (e.target.id === "delete-guide-button") {
+                        selectedGuide = guide
+                        deleteGuide(selectedGuide.id)
+                        selectedGuide = ""
+                        e.target.closest(".user-card").remove()
+                    } else {
+                        selectedGuide = guide
+                        renderGuideShow(guide)
+                    }
                 } )
-                userGuideCard.append(title)
+                userGuideCard.append(editGuideButton, deleteGuideButton, title)
                 guidesBox.append(userGuideCard)
                 userBox.append(guidesBox)
             })
@@ -363,6 +427,186 @@ const renderSignupPage = () => {
     
 }
 
+const renderEditUserPage = () => {
+    mainBox.innerHTML = null
+    const editUserArea = document.createElement("div")
+    editUserArea.classList.add("edit-users-form-area")
+    editUserArea.dataset.id = selectedUser.id
+    const editFormTitle = document.createElement("h1")
+    editFormTitle.innerText = `Edit ${selectedUser.username}`
+    const editUserForm = document.createElement("form")
+    editUserForm.id = "edit-user-form"
+    const nameLabel = document.createElement("label")
+    nameLabel.innerText = "Name: "
+    const nameInput = document.createElement("input")
+    nameInput.type = "text"
+    nameInput.name = "name"
+    nameInput.id = "name"
+    nameInput.value = `${selectedUser.name}`
+    const emailLabel = document.createElement("label")
+    emailLabel.innerText = "Email: "
+    const emailInput = document.createElement("input")
+    emailInput.type = "text"
+    emailInput.name = "email"
+    emailInput.id = "email"
+    emailInput.value = `${selectedUser.email}`
+    const imgLabel = document.createElement("label")
+    imgLabel.innerText = "Image: "
+    const imgInput = document.createElement("input")
+    imgInput.type = "text"
+    imgInput.name = "img_url"
+    imgInput.id = "img_url"
+    imgInput.value = `${selectedUser.img_url}`
+    const usernameLabel = document.createElement("label")
+    usernameLabel.innerText = "Username: "
+    const usernameInput = document.createElement("input")
+    usernameInput.type = "text"
+    usernameInput.name = "username"
+    usernameInput.id = "username"
+    usernameInput.value = `${selectedUser.username}`
+    const editUserButton = document.createElement("input")
+    editUserButton.type = "submit"
+    editUserButton.value = "Edit User"
+    editUserForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+        const editedUserObj = {
+            name: e.target.name.value,
+            username: e.target.username.value,
+            email: e.target.email.value,
+            img_url: e.target.img_url.value
+        }
+        editUser(selectedUser.id, editedUserObj)
+            .then(returnedEditedUserObj => {
+                selectedUser = returnedEditedUserObj
+                navBar.querySelector("#sign-up").classList.remove("active")
+                navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
+                navBar.querySelector("#sign-up").innerText = "Logout"
+                navBar.querySelector("#login").classList.add("active")
+                renderUserPage(selectedUser)
+            })
+    })
+    editUserForm.append(nameLabel, nameInput, emailLabel, emailInput, imgLabel, imgInput, usernameLabel, usernameInput, editUserButton)
+    editUserArea.append(editFormTitle, editUserForm)
+    mainBox.append(editUserArea)
+}
+
+const renderNewGuideForm = () => {
+    mainBox.innerHTML = null
+    const newGuideFormArea = document.createElement("div")
+    newGuideFormArea.classList.add("new-guide-form-area")
+    newGuideFormArea.dataset.id = selectedUser.id
+    const newGuideFormTitle = document.createElement("h1")
+    newGuideFormTitle.innerText = "Write a Guide"
+    const newGuideForm = document.createElement("form")
+    newGuideForm.id = "new-guide-form"
+    const titleLabel = document.createElement("label")
+    titleLabel.innerText = "Title: "
+    const titleInput = document.createElement("input")
+    titleInput.type = "text"
+    titleInput.name = "title"
+    titleInput.id = "title"
+    const categoryLabel = document.createElement("label")
+    categoryLabel.innerText = "Category: "
+    const categoryInput = document.createElement("input")
+    categoryInput.type = "text"
+    categoryInput.name = "category"
+    categoryInput.id = "category"
+    const contentLabel = document.createElement("label")
+    contentLabel.innerText = "Content: "
+    const contentInput = document.createElement("input")
+    contentInput.type = "text-area"
+    contentInput.name = "content"
+    contentInput.id = "content"
+    const imgLabel = document.createElement("label")
+    imgLabel.innerText = "Image: "
+    const imgInput = document.createElement("input")
+    imgInput.type = "text"
+    imgInput.name = "img_url"
+    imgInput.id = "img_url"
+    const postGuideButton = document.createElement("input")
+    postGuideButton.type = "submit"
+    postGuideButton.value = "Post Guide"
+    newGuideForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+        const newGuideObj = {
+            user_id: selectedUser.id,
+            title: e.target.title.value,
+            category: e.target.category.value,
+            content: e.target.content.value,
+            img_url: e.target.img_url.value
+        }
+        createGuide(newGuideObj)
+            .then(createdGuide => {
+                console.log(createdGuide)
+                selectedGuide = createdGuide
+                renderGuideShow(selectedGuide)
+            })
+    })
+    newGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, postGuideButton)
+    newGuideFormArea.append(newGuideFormTitle, newGuideForm)
+    mainBox.append(newGuideFormArea)
+}
+
+const renderEditGuideForm = () => {
+    mainBox.innerHTML = null
+    const editGuideFormArea = document.createElement("div")
+    editGuideFormArea.classList.add("edit-guide-form-area")
+    editGuideFormArea.dataset.id = selectedUser.id
+    const editGuideFormTitle = document.createElement("h1")
+    editGuideFormTitle.innerText = "Edit Guide"
+    const editGuideForm = document.createElement("form")
+    editGuideForm.id = "edit-guide-form"
+    const titleLabel = document.createElement("label")
+    titleLabel.innerText = "Title: "
+    const titleInput = document.createElement("input")
+    titleInput.type = "text"
+    titleInput.name = "title"
+    titleInput.id = "title"
+    titleInput.value = `${selectedGuide.title}`
+    const categoryLabel = document.createElement("label")
+    categoryLabel.innerText = "Category: "
+    const categoryInput = document.createElement("input")
+    categoryInput.type = "text"
+    categoryInput.name = "category"
+    categoryInput.id = "category"
+    categoryInput.value = `${selectedGuide.category}`
+    const contentLabel = document.createElement("label")
+    contentLabel.innerText = "Content: "
+    const contentInput = document.createElement("input")
+    contentInput.type = "text-area"
+    contentInput.name = "content"
+    contentInput.id = "content"
+    contentInput.value = `${selectedGuide.content}`
+    const imgLabel = document.createElement("label")
+    imgLabel.innerText = "Image: "
+    const imgInput = document.createElement("input")
+    imgInput.type = "text"
+    imgInput.name = "img_url"
+    imgInput.id = "img_url"
+    imgInput.value = `${selectedGuide.img_url}`
+    const editGuideButton = document.createElement("input")
+    editGuideButton.type = "submit"
+    editGuideButton.value = "Post Guide"
+    editGuideForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+        const editedGuideObj = {
+            user_id: selectedUser.id,
+            title: e.target.title.value,
+            category: e.target.category.value,
+            content: e.target.content.value,
+            img_url: e.target.img_url.value
+        }
+        editGuide(selectedGuide.id, editedGuideObj)
+            .then(returnedEditedGuideObj => {
+                console.log(returnedEditedGuideObj)
+                selectedGuide = returnedEditedGuideObj
+                renderGuideShow(selectedGuide)
+            })
+    })
+    editGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, editGuideButton)
+    editGuideFormArea.append(editGuideFormTitle, editGuideForm)
+    mainBox.append(editGuideFormArea)
+}
 
 
 
