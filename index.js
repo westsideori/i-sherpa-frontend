@@ -513,8 +513,7 @@ const renderNewGuideForm = () => {
     categoryInput.id = "category"
     const contentLabel = document.createElement("label")
     contentLabel.innerText = "Content: "
-    const contentInput = document.createElement("input")
-    contentInput.type = "text-area"
+    const contentInput = document.createElement("TEXTAREA")
     contentInput.name = "content"
     contentInput.id = "content"
     const imgLabel = document.createElement("label")
