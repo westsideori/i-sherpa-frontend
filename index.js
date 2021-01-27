@@ -5,6 +5,26 @@ const navBar = document.querySelector(".topnav")
 //Session Variables
 let selectedUser = ""
 let selectedGuide = ""
+let allGuides = []
+let userGuideArray = []
+
+//Helpers & Toggles
+const removeHighlightsFromNav = () => {
+    document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
+    document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
+}
+
+const highlightNavItem = (navItem) => {
+    navBar.querySelector(navItem).classList.add("active")
+}
+
+const removeHighlight = (navItem) => {
+    navBar.querySelector(navItem).classList.remove("active")
+}
+
+const activateTarget = (element) => {
+    element.classList.add("active")
+}
 
 //Fetches
 const getUsers = (id) => {
@@ -72,8 +92,6 @@ const editGuide = (id, editedGuideObj) => {
         .then(resp => resp.json())
 }
 
-
-
 const deleteGuide = (id) => {
     return fetch(`http://localhost:3000/guides/${id}`, {
         method: 'DELETE'
@@ -81,53 +99,93 @@ const deleteGuide = (id) => {
         .then(resp => resp.json())
 }
 
+const addLike = (likeObj) => {
+    return fetch(`http://localhost:3000/likes`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(likeObj)
+    })
+        .then(resp => resp.json())
+}
+
+const addComment = (commentObj) => {
+    return fetch(`http://localhost:3000/comments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commentObj)
+    })
+        .then(resp => resp.json())
+}
+
+const deleteComment = (id) => {
+    return fetch(`http://localhost:3000/comments/${id}`, {
+        method: 'DELETE'
+    })
+        .then(resp => resp.json())
+}
+
+const addTokenToUser = (tokenObj) => {
+    return fetch(`http://localhost:3000/tokens`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(tokenObj)
+    })
+        .then(resp => resp.json())
+}
+
+const removeTokenFromUser = (id) => {
+    return fetch(`http://localhost:3000/tokens/${id}`, {
+        method: 'DELETE'
+    })
+        .then(resp => resp.json())
+}
+
 //Event Listener
 document.addEventListener("DOMContentLoaded", function() {
-    navBar.querySelector("#home").classList.add("active")
+    highlightNavItem("#home")
     getGuides()
         .then(guideArray => {
-            renderGuides(guideArray)
+            allGuides = guideArray
+            renderGuides(allGuides)
         })
 })
 
 navBar.addEventListener("click", function (e) {
     if (e.target.id === "home") {
         e.preventDefault()
-        document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-        document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-        e.target.classList.add("active")
+        removeHighlightsFromNav()
+        activateTarget(e.target)
         mainBox.innerHTML = null
-        getGuides()
-            .then(guideArray => {
-                renderGuides(guideArray)
-            })
+        renderGuides(allGuides)
     } else if (e.target.id === "write-guide") {
         e.preventDefault()
         if (!selectedUser) {
-            // document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            // document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            // e.target.classList.add("active")
             window.alert("Login or Sign Up to Post a Guide")
+            removeHighlightsFromNav()
+            highlightNavItem("#login")
             renderLoginPage()
         } else {
-            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            e.target.classList.add("active")
+            removeHighlightsFromNav()
+            activateTarget(e.target)
             renderNewGuideForm()
         }
     } else if (e.target.id === "how-it-works") {
         e.preventDefault()
-        document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-        document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-        e.target.classList.add("active")
+        removeHighlightsFromNav()
+        activateTarget(e.target)
         console.log("This is how it works!")
     } else if (e.target.id === "sign-up") {
         if (e.target.innerText === "Logout") {
             e.preventDefault()
             logoutUser()
-            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelector("#home").classList.add("active")
+            removeHighlightsFromNav()
+            highlightNavItem("#home")
             getGuides()
                 .then(guidesArray => {
                     renderGuides(guidesArray)
@@ -135,23 +193,20 @@ navBar.addEventListener("click", function (e) {
             console.log("Signed out!")
         } else {
             e.preventDefault()
-            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            e.target.classList.add("active")
+            removeHighlightsFromNav()
+            activateTarget(e.target)
             renderSignupPage()
         }
     } else if (e.target.id === "login") {
         if (e.target.innerText === "Login") {
             e.preventDefault()
-            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            e.target.classList.add("active")
+            removeHighlightsFromNav()
+            activateTarget(e.target)
             renderLoginPage()
         } else {
             e.preventDefault()
-            document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-            document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-            e.target.classList.add("active")
+            removeHighlightsFromNav()
+            activateTarget(e.target)
             renderUserPage(selectedUser)
             console.log("My Profile!")
         }
@@ -168,10 +223,11 @@ const loginUser = (username) => {
             })
             if (user[0]) {
                 selectedUser = user[0]
-                navBar.querySelector("#login").classList.remove("active")
+                userGuideArray = selectedUser.guides
+                removeHighlight("#login")
                 navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
                 navBar.querySelector("#sign-up").innerText = "Logout"
-                navBar.querySelector("#home").classList.add("active")
+                highlightNavItem("#home")
                 getGuides()
                     .then(guideArray => {
                         renderGuides(guideArray)
@@ -186,6 +242,7 @@ const loginUser = (username) => {
 
 const logoutUser = () => {
     selectedUser = ""
+    userGuideArray = []
     navBar.querySelector("#sign-up").innerText = `Sign Up`
     navBar.querySelector("#login").innerText = "Login"
 }
@@ -200,10 +257,57 @@ const renderGuide = (guideObj) => {
     author.innerText = guideObj.user.name
     card.className = "card"
     card.dataset.id = guideObj.id
-    card.addEventListener("click", function() {
-        selectedGuide = guideObj
-        renderGuideShow(guideObj)
-    } )
+    if (selectedUser) {
+        getUsers(selectedUser.id)
+            .then(upToDateUser => {
+                selectedUser = upToDateUser
+                card.addEventListener("click", function() {
+                    if (guideObj.user_id === selectedUser.id) {
+                        console.log("It's my guide!")
+                        selectedGuide = guideObj
+                        renderGuideShow(guideObj)
+                    } else {
+                        console.log("Not my guide!")
+                        selectedGuide = guideObj
+                        if (selectedUser.tokens.length > 1) {
+                            
+                            console.log("I have money!")
+                            selectedUser.tokens.pop()
+                            removeTokenFromUser(selectedUser.tokens[0].id)
+                                .then(removedToken => {
+                                    const newToken = {
+                                        user_id: selectedGuide.user_id
+                                    }
+                                    addTokenToUser(newToken)
+                                        .then(returnedToken => {
+                                            renderGuideShow(selectedGuide)
+                                        })
+                                })                        
+                        } else if (selectedUser.tokens.length = 1) {
+                            console.log("I have money!")
+                            removeTokenFromUser(selectedUser.tokens[0].id)
+                                .then(removedToken => {
+                                    const newToken = {
+                                        user_id: selectedGuide.user_id
+                                    }
+                                    addTokenToUser(newToken)
+                                        .then(returnedToken => {
+                                            renderGuideShow(selectedGuide)
+                                        })
+                                })                
+                        } else {
+                            console.log("No Money!")
+                            window.alert("You're out of Tokens! Write new Guides to earn more Tokens!")
+                        }
+                    }
+                })
+        } )
+    } else {
+        card.addEventListener("click", function() {
+            selectedGuide = ""
+            renderLoginPage()
+        } )
+    }
     card.append(title, author)
     mainBox.append(card)
 }
@@ -216,10 +320,7 @@ function renderGuides(guidesArray) {
 
 const renderGuideShow = (guideObj) => {
     mainBox.innerHTML = null
-    document.querySelectorAll(".left-nav-items").forEach(el => el.classList.remove('active'))
-    document.querySelectorAll(".right-nav-items").forEach(el => el.classList.remove('active'))
-    // navBar.querySelector("#home").classList.remove("active")
-    // navBar.querySelector("#home").classList = ("left-nav-items")
+    removeHighlightsFromNav()
     const showGuide = document.createElement("div")
     showGuide.className = "show"
     showGuide.dataset.id = guideObj.id
@@ -240,7 +341,22 @@ const renderGuideShow = (guideObj) => {
     const likeButton = document.createElement("button")
     likeButton.innerText = "Like"
     likeButton.addEventListener("click", function () {
-        console.log("Liked!")
+        const newLikeObj = {
+            user_id: selectedUser.id,
+            guide_id: showGuide.dataset.id
+        }
+        addLike(newLikeObj)
+            .then(returnedNewLikeObj => {
+                console.log(returnedNewLikeObj)
+                if (selectedUser.id === returnedNewLikeObj.guide.user.id) {
+                    window.alert("You can't like your own guide!")
+                } else if (returnedNewLikeObj.id === null) {
+                    window.alert("Already Liked!")
+                } else {
+                likesAmount.innerText = `${guideObj.likes.length++} Likes`
+                renderGuideShow(guideObj)
+                }
+            })
     })
     const commentArea = document.createElement("div")
     commentArea.className = "comment-area"
@@ -248,6 +364,29 @@ const renderGuideShow = (guideObj) => {
     commentsLabel.innerText = "Comments"
     const commentsList = document.createElement("ul")
     commentsList.id = "comments"
+    if (guideObj.comments.length === 0) {
+        const newP = document.createElement("p")
+        newP.innerText = "No Comments Yet"
+        commentArea.append(newP)
+    } else {
+        guideObj.comments.forEach((comment) => {
+            const newLi = document.createElement("li")
+            newLi.dataset.id = comment.id
+            newLi.innerText = `${comment.user.username} (${comment.created_at}): ${comment.comment}`
+            if (selectedUser.id === comment.user.id) {
+                const deleteButton = document.createElement("button")
+                deleteButton.innerText = "X"
+                deleteButton.addEventListener("click", (e) => {
+                    deleteComment(newLi.dataset.id)
+                        .then(deletedObj => {
+                            deleteButton.closest("li").remove()
+                        })
+                })
+                newLi.append(deleteButton)
+            }
+            commentsList.append(newLi)
+        })
+    }
     const toggleCommentFormButton = document.createElement("button")
     toggleCommentFormButton.innerText = "Comment"
     const commentForm = document.createElement("form")
@@ -270,7 +409,29 @@ const renderGuideShow = (guideObj) => {
     })
     commentForm.addEventListener("submit", function (e) {
         e.preventDefault()
-        console.log("Commented!")
+        const newCommentObj = {
+            user_id: selectedUser.id,
+            guide_id: showGuide.dataset.id,
+            comment: e.target.comment.value
+        }
+        addComment(newCommentObj)
+            .then(returnedNewCommentObj => {
+                const newLi = document.createElement("li")
+                newLi.dataset.id = returnedNewCommentObj.id
+                newLi.innerText = `${returnedNewCommentObj.user.username} (${returnedNewCommentObj.created_at}): ${returnedNewCommentObj.comment}`
+                if (selectedUser.id === returnedNewCommentObj.user.id) {
+                    const deleteButton = document.createElement("button")
+                    deleteButton.innerText = "X"
+                    deleteButton.addEventListener("click", (e) => {
+                        deleteComment(newLi.dataset.id)
+                            .then(deletedObj => {
+                                deleteButton.closest("li").remove()
+                            })
+                    })
+                    newLi.append(deleteButton)
+                }
+                commentsList.append(newLi)
+            })
     })
     commentForm.append(commentInput, commentSubmit)
     commentArea.append(commentsLabel, commentsList, toggleCommentFormButton, commentForm)
@@ -326,49 +487,42 @@ const renderUserPage = (selectedUser) => {
     const guidesLabel = document.createElement("h2")
     guidesLabel.innerText = "Guides: "
     guidesBox.append(guidesLabel)
-    getGuides()
-        .then(guidesArray => {
-            let userGuides = guidesArray.filter(guide => {
-                return guide.user_id === selectedUser.id
-            })
-            userGuides.forEach(function (guide) {
-                const userGuideCard = document.createElement("div")
-                userGuideCard.className = "user-card"
-                const title = document.createElement("h2")
-                const editGuideButton = document.createElement("button")
-                editGuideButton.innerText = "Edit"
-                editGuideButton.id = "edit-guide-button"
-                const deleteGuideButton = document.createElement("button")
-                deleteGuideButton.innerText = "Delete"
-                deleteGuideButton.id = "delete-guide-button"
-                title.innerText = guide.title
-                userGuideCard.dataset.id = guide.id
-                userGuideCard.addEventListener("click", function(e) {
-                    if (e.target.id === "edit-guide-button" ){
-                        selectedGuide = guide
-                        navBar.querySelector("#login").classList.remove(".active")
-                        renderEditGuideForm()
-                    } else if (e.target.id === "delete-guide-button") {
-                        selectedGuide = guide
-                        deleteGuide(selectedGuide.id)
-                        selectedGuide = ""
-                        e.target.closest(".user-card").remove()
-                    } else {
-                        selectedGuide = guide
-                        renderGuideShow(guide)
-                    }
-                } )
-                userGuideCard.append(editGuideButton, deleteGuideButton, title)
-                guidesBox.append(userGuideCard)
-                userBox.append(guidesBox)
-            })
-    })
-    
     const wallet = document.createElement("h3")
     wallet.innerText = "Wallet: "
     const walletAmount = document.createElement("p")
-    walletAmount.innerText = "3 Tokens"
+    walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
     userBox.append(userImage, editButton, deleteButton, name, wallet, walletAmount)
+    userGuideArray.forEach(function (guide) {
+        const userGuideCard = document.createElement("div")
+        userGuideCard.className = "user-card"
+        const title = document.createElement("h2")
+        const editGuideButton = document.createElement("button")
+        editGuideButton.innerText = "Edit"
+        editGuideButton.id = "edit-guide-button"
+        const deleteGuideButton = document.createElement("button")
+        deleteGuideButton.innerText = "Delete"
+        deleteGuideButton.id = "delete-guide-button"
+        title.innerText = guide.title
+        userGuideCard.dataset.id = guide.id
+        userGuideCard.addEventListener("click", function(e) {
+            if (e.target.id === "edit-guide-button" ){
+                selectedGuide = guide
+                removeHighlight("#login")
+                renderEditGuideForm()
+            } else if (e.target.id === "delete-guide-button") {
+                selectedGuide = guide
+                deleteGuide(selectedGuide.id)
+                selectedGuide = ""
+                e.target.closest(".user-card").remove()
+            } else {
+                selectedGuide = guide
+                renderGuideShow(guide)
+            }
+        } )
+        userGuideCard.append(editGuideButton, deleteGuideButton, title)
+        guidesBox.append(userGuideCard)
+        userBox.append(guidesBox)
+    })
     mainBox.append(userBox)
 }
 
@@ -414,10 +568,10 @@ const renderSignupPage = () => {
         signupUser(newUserObj)
             .then(userObj => {
                 selectedUser = userObj
-                navBar.querySelector("#sign-up").classList.remove("active")
+                removeHighlight("#sign-up")
                 navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
                 navBar.querySelector("#sign-up").innerText = "Logout"
-                navBar.querySelector("#login").classList.add("active")
+                highlightNavItem("#login")
                 renderUserPage(selectedUser)
 
             })
@@ -478,10 +632,10 @@ const renderEditUserPage = () => {
         editUser(selectedUser.id, editedUserObj)
             .then(returnedEditedUserObj => {
                 selectedUser = returnedEditedUserObj
-                navBar.querySelector("#sign-up").classList.remove("active")
+                removeHighlight("#sign-up")
                 navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
                 navBar.querySelector("#sign-up").innerText = "Logout"
-                navBar.querySelector("#login").classList.add("active")
+                highlightNavItem("#login")
                 renderUserPage(selectedUser)
             })
     })
@@ -538,7 +692,13 @@ const renderNewGuideForm = () => {
             .then(createdGuide => {
                 console.log(createdGuide)
                 selectedGuide = createdGuide
+                allGuides.push(createdGuide)
+                userGuideArray.push(createdGuide)
                 renderGuideShow(selectedGuide)
+                const newToken = {
+                    user_id: selectedUser.id
+                }
+                addTokenToUser(newToken)
             })
     })
     newGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, postGuideButton)

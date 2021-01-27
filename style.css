@@ -131,8 +131,12 @@ form input[type="submit"] {
 }
 form textarea {
     height: 290px;
-    width: 700px;
+    width: 500px;
     margin-bottom: 20px;
+}
+
+#new-guide-form {
+    width: 100%;
 }
 
 /* #main-box {
