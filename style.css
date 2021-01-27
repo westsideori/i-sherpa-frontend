@@ -1,11 +1,16 @@
+body {
+    font-family: sans-serif;
+}
+
 .topnav {
     overflow: hidden;
-    background-color: #333;
+    background-color: green;
+    color: gold;
+    
 }
-  
+
 .left-nav-items {
     float: left;
-    color: #f2f2f2;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -14,23 +19,23 @@
 
 .right-nav-items {
     float: right;
-    color: #f2f2f2;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
 }
 
+.topnav a:visited {
+    color: gold;
+}
+
 .topnav a:hover {
-    background-color: #ddd;
-    color: black;
+    color: white;
 }
 
 .topnav a.active {
-    background-color: #4CAF50;
-    color: white;
+    background-color: rgb(143, 38, 38);
     /* float: left; */
-    color: #f2f2f2;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -51,10 +56,18 @@
 .card {
     background-color: #f1f1f1;
     margin: 10px;
-    padding: 50px;
+    padding: 70px 40px;
     width: 150px;
-    font-size: 30px;
+    font-size: 20px;
     border-style: solid;
+    border-left: 50px solid;
+    cursor: pointer;
+}
+
+.card:hover, .user-card:hover {
+    background-color: rgb(143, 38, 38);
+    border-left-color: green;
+    color: gold;
 }
 
 .show {
@@ -93,23 +106,36 @@
     font-size: 30px;
     border-style: solid;
     /* overflow: hidden; */
-    word-wrap: break-word;
+    /* word-wrap: break-word; */
 }
 
 .user-image {
-    float: right;
     border-style: solid;
-    width: 20vw;
-    height: 20vh;
+    width: 17%;
+    height: 22%;
+    border-radius: 50%;
 }
 
 .user-card {
     background-color: #f1f1f1;
     margin: 10px;
-    padding: 50px;
-    width: 200px;
-    font-size: 30px;
+    padding: 70px 40px;
+    width: 150px;
+    font-size: 20px;
     border-style: solid;
+    border-left: 50px solid;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.wallet-area {
+    position: absolute;
+    right: 253px;
+    top: 307px;
+    background-color: green;
+    padding: 0 30px 20px;
+    border: 5px solid rgb(143, 38, 38);
+    color: gold;
 }
 
 form {

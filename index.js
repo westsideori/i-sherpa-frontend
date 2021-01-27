@@ -431,6 +431,9 @@ const renderGuideShow = (guideObj) => {
                     newLi.append(deleteButton)
                 }
                 commentsList.append(newLi)
+                e.target.reset()
+                commentForm.style.display = "none"
+
             })
     })
     commentForm.append(commentInput, commentSubmit)
@@ -445,6 +448,8 @@ const renderLoginPage = () => {
     mainBox.innerHTML = null
     const loginForm = document.createElement("form")
     loginForm.id = "login-form"
+    const usernameLabel = document.createElement("label")
+    usernameLabel.innerText = "Username: "
     const usernameInput = document.createElement("input")
     usernameInput.type = "text"
     usernameInput.name = "username"
@@ -456,7 +461,7 @@ const renderLoginPage = () => {
         e.preventDefault()
         loginUser(e.target.username.value)
     })
-    loginForm.append(usernameInput, loginButton)
+    loginForm.append(usernameLabel, usernameInput, loginButton)
     mainBox.append(loginForm)
     
 }
@@ -487,11 +492,14 @@ const renderUserPage = (selectedUser) => {
     const guidesLabel = document.createElement("h2")
     guidesLabel.innerText = "Guides: "
     guidesBox.append(guidesLabel)
+    const walletArea = document.createElement("div")
+    walletArea.classList.add("wallet-area")
     const wallet = document.createElement("h3")
     wallet.innerText = "Wallet: "
     const walletAmount = document.createElement("p")
     walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
-    userBox.append(userImage, editButton, deleteButton, name, wallet, walletAmount)
+    walletArea.append(wallet, walletAmount)
+    userBox.append( editButton, deleteButton, name, userImage, walletArea)
     userGuideArray.forEach(function (guide) {
         const userGuideCard = document.createElement("div")
         userGuideCard.className = "user-card"
@@ -699,6 +707,7 @@ const renderNewGuideForm = () => {
                     user_id: selectedUser.id
                 }
                 addTokenToUser(newToken)
+                selectedUser.tokens.push(newToken)
             })
     })
     newGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, postGuideButton)
