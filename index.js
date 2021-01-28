@@ -146,6 +146,17 @@ const removeTokenFromUser = (id) => {
         .then(resp => resp.json())
 }
 
+const purchaseGuide = (purchasedGuideObj) => {
+    return fetch(`http://localhost:3000/purchased_guides`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(purchasedGuideObj)
+    })
+        .then(resp => resp.json())
+}
+
 //Event Listener
 document.addEventListener("DOMContentLoaded", function() {
     highlightNavItem("#home")
@@ -162,7 +173,13 @@ navBar.addEventListener("click", function (e) {
         removeHighlightsFromNav()
         activateTarget(e.target)
         mainBox.innerHTML = null
-        renderGuides(allGuides)
+        getGuides()
+            .then(guideArray => {
+                allGuides = guideArray
+                renderGuides(guideArray)
+            })
+        
+        
     } else if (e.target.id === "write-guide") {
         e.preventDefault()
         if (!selectedUser) {
@@ -207,7 +224,11 @@ navBar.addEventListener("click", function (e) {
             e.preventDefault()
             removeHighlightsFromNav()
             activateTarget(e.target)
-            renderUserPage(selectedUser)
+            getUsers(selectedUser.id)
+                .then(user => {
+                    renderUserPage(user)
+                })
+            
             console.log("My Profile!")
         }
     }
@@ -223,7 +244,14 @@ const loginUser = (username) => {
             })
             if (user[0]) {
                 selectedUser = user[0]
-                userGuideArray = selectedUser.guides
+                getGuides()
+                    .then(guideArray => {
+                        
+                        userGuideArray = guideArray.filter(guide => {
+                            return guide.user_id === selectedUser.id
+                        })
+                    })
+                // debugger
                 removeHighlight("#login")
                 navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
                 navBar.querySelector("#sign-up").innerText = "Logout"
@@ -243,58 +271,131 @@ const loginUser = (username) => {
 const logoutUser = () => {
     selectedUser = ""
     userGuideArray = []
+    selectedGuide = ""
+    allGuides = []
     navBar.querySelector("#sign-up").innerText = `Sign Up`
     navBar.querySelector("#login").innerText = "Login"
+    mainBox.innerHTML = null
+    getGuides()
+        .then(guideArray => {
+            renderGuides(guideArray)
+        })
+}
+
+const replenishUser = (id) => {
+    getUsers()
+        .then(usersArray => {
+            let user = usersArray.filter(user => {
+                return user.id === id
+            })
+            if (user[0]) {
+                selectedUser = user[0]
+                userGuideArray = selectedUser.guides
+            }
+        })
 }
 
 
 //Renders
 const renderGuide = (guideObj) => {
+    
     const card = document.createElement("div")
     const title = document.createElement("h2")
     const author = document.createElement("h3")
     title.innerText = guideObj.title
-    author.innerText = guideObj.user.name
+    author.innerText = `By: ${guideObj.user.username}`
     card.className = "card"
     card.dataset.id = guideObj.id
     if (selectedUser) {
+        if (selectedUser.purchased_guides.length > 0) {
+            
+            const filteredGuideArray = selectedUser.purchased_guides.filter(guide => {
+                
+                return guide.guide_id === guideObj.id
+            })
+            
+            if (filteredGuideArray.length > 0 && filteredGuideArray[0].guide_id === guideObj.id) {
+                const greenCheck = document.createElement("span")
+                greenCheck.innerHTML = `&#10003` 
+                greenCheck.classList.add("green-check")
+                card.append(greenCheck)
+            }
+        }
         getUsers(selectedUser.id)
             .then(upToDateUser => {
                 selectedUser = upToDateUser
+                
                 card.addEventListener("click", function() {
-                    if (guideObj.user_id === selectedUser.id) {
-                        console.log("It's my guide!")
+                    let userPurchasedGuides = selectedUser.purchased_guides.filter(guide => {
+                        return guide.guide_id === guideObj.id
+                        
+                    })
+                    
+                    if (guideObj.user_id === selectedUser.id || userPurchasedGuides.length > 0) {
+                        
                         selectedGuide = guideObj
                         renderGuideShow(guideObj)
                     } else {
-                        console.log("Not my guide!")
+                        
                         selectedGuide = guideObj
                         if (selectedUser.tokens.length > 1) {
                             
+                            if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
+                                selectedUser.tokens.pop()
+                                const newPurchasedGuide = {
+                                    user_id: selectedUser.id,
+                                    guide_id: selectedGuide.id
+                                }
+                                
+                                purchaseGuide(newPurchasedGuide)
+                                    .then(purchasedGuideObject => {
+                                        getGuides()
+                                            .then(guideArray => {
+                                                allGuides = guideArray
+                                            })
+                                    })
+                                removeTokenFromUser(selectedUser.tokens[0].id)
+                                    .then(removedToken => {
+                                        const newToken = {
+                                            user_id: selectedGuide.user_id
+                                        }
+                                        addTokenToUser(newToken)
+                                            .then(returnedToken => {
+                                                renderGuideShow(selectedGuide)
+                                            })
+                                    }) 
+                            }
+                            
+                                                   
+                        } else if (selectedUser.tokens.length === 1) {
+                            // debugger
                             console.log("I have money!")
-                            selectedUser.tokens.pop()
-                            removeTokenFromUser(selectedUser.tokens[0].id)
-                                .then(removedToken => {
-                                    const newToken = {
-                                        user_id: selectedGuide.user_id
-                                    }
-                                    addTokenToUser(newToken)
-                                        .then(returnedToken => {
-                                            renderGuideShow(selectedGuide)
-                                        })
-                                })                        
-                        } else if (selectedUser.tokens.length = 1) {
-                            console.log("I have money!")
-                            removeTokenFromUser(selectedUser.tokens[0].id)
-                                .then(removedToken => {
-                                    const newToken = {
-                                        user_id: selectedGuide.user_id
-                                    }
-                                    addTokenToUser(newToken)
-                                        .then(returnedToken => {
-                                            renderGuideShow(selectedGuide)
-                                        })
-                                })                
+                            if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
+                                // const greenCheck = document.createElement("span")
+                                // greenCheck.innerHTML = `&#10003` 
+                                // greenCheck.classList.add("green-check")
+                                // card.append(greenCheck)
+                                const newPurchasedGuide = {
+                                    user_id: selectedUser.id,
+                                    guide_id: selectedGuide.id
+                                }
+                                
+                                purchaseGuide(newPurchasedGuide)
+                                const greenCheck = document.createElement("span")
+                                greenCheck.innerHTML = `&#10003` 
+                                greenCheck.classList.add("green-check")
+                                card.append(greenCheck)
+                                removeTokenFromUser(selectedUser.tokens[0].id)
+                                    .then(removedToken => {
+                                        const newToken = {
+                                            user_id: selectedGuide.user_id
+                                        }
+                                        addTokenToUser(newToken)
+                                            .then(returnedToken => {
+                                                renderGuideShow(selectedGuide)
+                                            })
+                                    })    
+                            }            
                         } else {
                             console.log("No Money!")
                             window.alert("You're out of Tokens! Write new Guides to earn more Tokens!")
@@ -337,9 +438,12 @@ const renderGuideShow = (guideObj) => {
     const likesArea = document.createElement("div")
     likesArea.className = "likes-area"
     const likesAmount = document.createElement("p")
+    
     likesAmount.innerText = `${guideObj.likes.length} Likes`
+    
     const likeButton = document.createElement("button")
     likeButton.innerText = "Like"
+    
     likeButton.addEventListener("click", function () {
         const newLikeObj = {
             user_id: selectedUser.id,
@@ -347,16 +451,13 @@ const renderGuideShow = (guideObj) => {
         }
         addLike(newLikeObj)
             .then(returnedNewLikeObj => {
-                console.log(returnedNewLikeObj)
-                if (selectedUser.id === returnedNewLikeObj.guide.user.id) {
-                    window.alert("You can't like your own guide!")
-                } else if (returnedNewLikeObj.id === null) {
-                    window.alert("Already Liked!")
-                } else {
-                likesAmount.innerText = `${guideObj.likes.length++} Likes`
-                renderGuideShow(guideObj)
-                }
+                guideObj.likes.push(returnedNewLikeObj)
+                likesAmount.innerText = `${guideObj.likes.length} Likes`
+                likeButton.disabled = true
+                
             })
+        // renderGuideShow(guideObj)
+        
     })
     const commentArea = document.createElement("div")
     commentArea.className = "comment-area"
@@ -440,6 +541,13 @@ const renderGuideShow = (guideObj) => {
     commentArea.append(commentsLabel, commentsList, toggleCommentFormButton, commentForm)
     likesArea.append(likesAmount, likeButton)
     showGuide.append(showImage, title, author, content, likesArea, commentArea)
+    let likesArray = guideObj.likes.filter(like => {
+        return like.user_id === selectedUser.id
+    })
+    // debugger
+    if (selectedUser.id === guideObj.user_id || likesArray.length > 0) {
+        likeButton.disabled = true
+    }
     mainBox.append(showGuide)
 
 }
@@ -500,7 +608,9 @@ const renderUserPage = (selectedUser) => {
     walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
     walletArea.append(wallet, walletAmount)
     userBox.append( editButton, deleteButton, name, userImage, walletArea)
+    
     userGuideArray.forEach(function (guide) {
+        
         const userGuideCard = document.createElement("div")
         userGuideCard.className = "user-card"
         const title = document.createElement("h2")
@@ -520,10 +630,13 @@ const renderUserPage = (selectedUser) => {
             } else if (e.target.id === "delete-guide-button") {
                 selectedGuide = guide
                 deleteGuide(selectedGuide.id)
+                allGuides = allGuides.filter(el => el.id !== guide.id)
                 selectedGuide = ""
+                replenishUser(selectedUser.id)
                 e.target.closest(".user-card").remove()
             } else {
                 selectedGuide = guide
+                
                 renderGuideShow(guide)
             }
         } )
@@ -689,6 +802,7 @@ const renderNewGuideForm = () => {
     postGuideButton.value = "Post Guide"
     newGuideForm.addEventListener("submit", (e) => {
         e.preventDefault()
+        setTimeout(window.alert("Congratulations! By posting a new Guide, you've earned 1 Token!"), 5000)
         const newGuideObj = {
             user_id: selectedUser.id,
             title: e.target.title.value,
@@ -708,7 +822,9 @@ const renderNewGuideForm = () => {
                 }
                 addTokenToUser(newToken)
                 selectedUser.tokens.push(newToken)
+                
             })
+        
     })
     newGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, postGuideButton)
     newGuideFormArea.append(newGuideFormTitle, newGuideForm)
