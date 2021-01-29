@@ -1,5 +1,6 @@
 body {
-    font-family: sans-serif
+    font-family: sans-serif;
+    background-image: linear-gradient(to bottom, gold, white);
 }
 
 h1 {
@@ -11,6 +12,15 @@ h1 {
 h2 {
     margin-top: 0;
     font-size: 35px;
+}
+
+.card h2 {
+    margin-top: 0;
+    font-size: 25px;
+}
+
+.card h3 {
+    font-size: 16px;
 }
 
 button, input[type="submit"] {
@@ -87,26 +97,29 @@ button+button {
   }
 
 .card {
-    background-color: #f1f1f1;
+    background-color: cornsilk;
     margin: 10px;
     padding: 70px 40px;
     width: 150px;
     font-size: 20px;
-    border-style: solid;
+    border-top: 20px solid lightgrey;
     border-left: 50px solid;
+    border-left-color: navajowhite;
     cursor: pointer;
+    border-radius: 0 7% 6% 6%;
 }
 
 .card:hover, .user-card:hover {
     background-color: rgb(143, 38, 38);
     border-left-color: green;
     color: gold;
+    border-top: 20px solid goldenrod;
 }
 
 
 .show {
     text-align: center;
-    background-color: #f1f1f1;
+    background-color: palegoldenrod;
     margin: 10px;
     padding: 40px;
     /* height: 100vh; */
@@ -135,13 +148,13 @@ button+button {
 }
 .user-box {
     
-    background-color: #f1f1f1;
+    background-color: palegoldenrod;
     margin: 10px;
     padding: 40px;
     height: 100%;
     width: 100vw;
     font-size: 30px;
-    border-style: solid;
+    /* border-style: solid; */
     text-align: center;
     /* overflow: hidden; */
     /* word-wrap: break-word; */
@@ -149,22 +162,30 @@ button+button {
 
 .user-image {
     border-style: solid;
-    width: 275px;
+    width: 325px;
     height: 275px;
     border-radius: 50%;
+    margin-bottom: 20px;
 }
 
 .user-card {
-    background-color: #f1f1f1;
+    background-color: cornsilk;
     margin: 10px;
     padding: 70px 30px;
     width: 167px;
     font-size: 20px;
-    border-style: solid;
+    /* border-style: solid; */
     border-left: 50px solid;
     cursor: pointer;
     display: inline-table;
     height: 150px;
+    border-left-color: navajowhite;
+    border-top: 20px solid lightgrey;
+    border-radius: 0 7% 6% 6%;
+}
+
+.user-card h2 {
+    margin-top: 15px;
 }
 
 .wallet-area {

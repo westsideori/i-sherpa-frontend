@@ -215,7 +215,7 @@ navBar.addEventListener("click", function (e) {
         e.preventDefault()
         removeHighlightsFromNav()
         activateTarget(e.target)
-        console.log("This is how it works!")
+        renderHowItWorksPage()
     } else if (e.target.id === "sign-up") {
         if (e.target.innerText === "Logout") {
             e.preventDefault()
@@ -541,6 +541,7 @@ const renderGuideShow = (guideObj) => {
             guide_id: showGuide.dataset.id,
             comment: e.target.comment.value
         }
+        commentArea.querySelector("p").remove()
         addComment(newCommentObj)
             .then(returnedNewCommentObj => {
                 const newLi = document.createElement("li")
@@ -554,6 +555,10 @@ const renderGuideShow = (guideObj) => {
                         deleteComment(newLi.dataset.id)
                             .then(deletedObj => {
                                 deleteButton.closest("li").remove()
+                                getUsers(selectedUser.id)
+                                    .then(updatedUser => {
+                                        selectedUser = updatedUser
+                                    })
                             })
                     })
                     newLi.append(deleteButton)
@@ -664,9 +669,11 @@ const renderUserPage = (selectedUser) => {
                 replenishUser(selectedUser.id)
                 e.target.closest(".user-card").remove()
             } else {
-                selectedGuide = guide
-                
-                renderGuideShow(guide)
+                getGuides(guide.id)
+                    .then(updatedGuide => {
+                        selectedGuide = updatedGuide
+                        renderGuideShow(selectedGuide)
+                    })
             }
         } )
         userGuideCard.append(editGuideButton, deleteGuideButton, title)
@@ -920,6 +927,24 @@ const renderEditGuideForm = () => {
     editGuideForm.append(titleLabel, titleInput, categoryLabel, categoryInput, contentLabel, contentInput, imgLabel, imgInput, editGuideButton)
     editGuideFormArea.append(editGuideFormTitle, editGuideForm)
     mainBox.append(editGuideFormArea)
+}
+
+const renderHowItWorksPage = () => {
+    mainBox.innerHTML = null
+    const aboutBox = document.createElement("div")
+    aboutBox.classList.add("show")
+    const aboutImage = document.createElement("img")
+    aboutImage.classList.add("show-image")
+    aboutImage.src = "https://lh3.googleusercontent.com/proxy/0eDBQOyYcah2qoahtjVmak8FEFbHuA9Kg9goW-9bMrYE-t2y-2Ex92YK2R6qTFzi5bZScrr8zPQqa9kIOJ55IGurD5frvBCD1eP2P2UwLQWCT1De3TQpbhytyL74"
+    aboutImage.alt = "iSherpa"
+    const aboutTitle = document.createElement("h1")
+    aboutTitle.innerText = "iSherpa - How It Works"
+    const aboutParagraph = document.createElement("p")
+    aboutParagraph.innerText = "Welcome to iSherpa! A community to read and share guides on any subject! To read another user's guide, you need to pay with a token. How do you earn tokens? By writing your own guide! Also, if another user reads your guide, you'll earn a token! Your token wallet is visible on the navigation bar once you log in." 
+    const bottomH2 = document.createElement("h2")
+    bottomH2.innerText = "Keep reading, writing, and sharing guides! Enjoy! -The iSherpa Team"
+    aboutBox.append(aboutImage, aboutTitle, aboutParagraph, bottomH2)
+    mainBox.append(aboutBox)
 }
 
 
