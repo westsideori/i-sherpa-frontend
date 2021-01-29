@@ -2,6 +2,39 @@ body {
     font-family: sans-serif
 }
 
+h1 {
+    font-family: fantasy;
+    font-weight: 800;
+    margin-bottom: 0;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 35px;
+}
+
+button, input[type="submit"] {
+    padding: 7px 25px;
+    color: gold;
+    border: 0;
+    background: green;
+    cursor: pointer;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: rgba(0, 128, 0, 0.8);
+}
+
+button:disabled {
+    background: #80808061;
+    color: white;
+    cursor: no-drop;
+}
+
+button+button {
+    margin-left: 5px;
+}
+
 .topnav {
     overflow: hidden;
     background-color: green;
@@ -45,7 +78,7 @@ body {
 .flex-container {
     display: flex;
     /* height: 100vh; */
-    border-style: solid;
+    /* border-style: solid; */
     flex-flow: row wrap;
     justify-content: space-around;
     /* align-items: flex-start;
@@ -72,7 +105,7 @@ body {
 
 
 .show {
-
+    text-align: center;
     background-color: #f1f1f1;
     margin: 10px;
     padding: 40px;
@@ -87,8 +120,8 @@ body {
 .show img {
     
     border-style: solid;
-    width: 30%;
-    height: 30%;
+    width: 400px;
+    height: 200px;
 }
 
 .show h1 h2 p {
@@ -96,47 +129,58 @@ body {
     word-wrap: break-word;
 
 }
-
+.show h2 + p {
+    border-bottom: 2px solid;
+    padding-bottom: 55px;
+}
 .user-box {
     
     background-color: #f1f1f1;
     margin: 10px;
     padding: 40px;
-    /* height: 100vh; */
+    height: 100%;
     width: 100vw;
     font-size: 30px;
     border-style: solid;
+    text-align: center;
     /* overflow: hidden; */
     /* word-wrap: break-word; */
 }
 
 .user-image {
     border-style: solid;
-    width: 17%;
-    height: 22%;
+    width: 275px;
+    height: 275px;
     border-radius: 50%;
 }
 
 .user-card {
     background-color: #f1f1f1;
     margin: 10px;
-    padding: 70px 40px;
-    width: 150px;
+    padding: 70px 30px;
+    width: 167px;
     font-size: 20px;
     border-style: solid;
     border-left: 50px solid;
     cursor: pointer;
-    display: inline-block;
+    display: inline-table;
+    height: 150px;
 }
 
 .wallet-area {
-    position: absolute;
-    right: 244px;
-    top: 226px;
-    background-color: green;
-    padding: 0 30px 20px;
-    border: 5px solid rgb(143, 38, 38);
+    border: 2px solid rgb(143, 38, 38);
     color: gold;
+    padding: 12px 16px;
+}
+
+.wallet-area h4 {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.wallet-area p {
+    display: inline-block;
+    margin: 0;
 }
 
 form {
@@ -144,8 +188,7 @@ form {
 }
 
 form label {
-    display: block;
-    margin-bottom: 10px;
+    margin-right: 10px;
 }
 
 form input {
@@ -154,7 +197,7 @@ form input {
 
 form input[type="submit"] {
     display: block;
-    margin: 30px 0;
+    margin: auto;
 }
 form textarea {
     height: 290px;
@@ -164,11 +207,42 @@ form textarea {
 
 #new-guide-form {
     width: 100%;
+    display: grid;
+}
+
+form#signup-form {
+    display: grid;
 }
 
 .green-check {
     color: green;
     font-size: 30px;
+}
+
+input[type="text"] {
+    height: 25px;
+    /* min-width: 121px; */
+    width: 170px;
+}
+
+.comment-area {
+    display: inline-block;
+    margin-left: 10%;
+}
+
+.likes-area {
+    display: inline-block;
+}
+
+#comments button {
+    background-color: maroon;
+    padding: 2px 7px;
+    vertical-align: middle;
+    margin-left: 15px;
+}
+
+ul li {
+    list-style: none;
 }
 
 /* #main-box {

@@ -26,6 +26,25 @@ const activateTarget = (element) => {
     element.classList.add("active")
 }
 
+const addWalletToNav = (selectedUser) => {
+    let walletArea = navBar.querySelector(".wallet-area")
+    console.log(walletArea)
+    if (walletArea) {
+        walletArea.getElementsByTagName("p")[0].innerText = `${selectedUser.tokens.length} Tokens`
+    } else {
+        walletArea = document.createElement("div")
+        walletArea.classList.add("wallet-area")
+        walletArea.classList.add("right-nav-items")
+        const wallet = document.createElement("h4")
+        wallet.innerText = "Wallet: "
+        const walletAmount = document.createElement("p")
+        walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
+        walletArea.append(wallet, walletAmount)
+        navBar.append(walletArea)
+    }
+}
+
+
 //Fetches
 const getUsers = (id) => {
     if (!id) {
@@ -242,7 +261,7 @@ const loginUser = (username) => {
                 selectedUser = user[0]
                 getGuides()
                     .then(guideArray => {
-                        
+                        allGuides = guideArray
                         userGuideArray = guideArray.filter(guide => {
                             return guide.user_id === selectedUser.id
                         })
@@ -252,10 +271,21 @@ const loginUser = (username) => {
                 navBar.querySelector("#login").innerText = `${selectedUser.username}'s Profile`
                 navBar.querySelector("#sign-up").innerText = "Logout"
                 highlightNavItem("#home")
-                getGuides()
-                    .then(guideArray => {
-                        renderGuides(guideArray)
-                    })
+                // const walletArea = document.createElement("div")
+                // walletArea.classList.add("wallet-area")
+                // walletArea.classList.add("right-nav-items")
+                // const wallet = document.createElement("h4")
+                // wallet.innerText = "Wallet: "
+                // const walletAmount = document.createElement("p")
+                // walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
+                // walletArea.append(wallet, walletAmount)
+                // navBar.append(walletArea)
+                addWalletToNav(selectedUser)
+                renderGuides(allGuides)
+                // getGuides()
+                //     .then(guideArray => {
+                //         renderGuides(guideArray)
+                //     })
 
             } else {
                 window.alert("No User with that Username was found!")
@@ -271,6 +301,7 @@ const logoutUser = () => {
     allGuides = []
     navBar.querySelector("#sign-up").innerText = `Sign Up`
     navBar.querySelector("#login").innerText = "Login"
+    navBar.querySelector(".wallet-area").remove()
     mainBox.innerHTML = null
     getGuides()
         .then(guideArray => {
@@ -294,7 +325,6 @@ const replenishUser = (id) => {
 
 //Renders
 const renderGuide = (guideObj) => {
-    console.log("I'm Here")
     const card = document.createElement("div")
     const title = document.createElement("h2")
     const author = document.createElement("h3")
@@ -303,7 +333,6 @@ const renderGuide = (guideObj) => {
     card.className = "card"
     card.dataset.id = guideObj.id
     if (selectedUser) {
-        console.log(selectedUser)
             if (selectedUser.purchased_guides.length > 0) {
                 const isGuidePurchased = selectedUser.purchased_guides.find(guide => {
                     return guide.guide_id === guideObj.id
@@ -349,15 +378,18 @@ const renderGuide = (guideObj) => {
                                     }
                                     addTokenToUser(newToken)
                                         .then(returnedToken => {
-                                            renderGuideShow(selectedGuide)
+                                            getUsers(selectedUser.id)
+                                                .then(userObj => {
+                                                    selectedUser = userObj
+                                                    addWalletToNav(selectedUser)
+                                                    renderGuideShow(selectedGuide)
+                                                })
                                         })
                                 }) 
                         }
                         
                                                 
                     } else if (selectedUser.tokens.length === 1) {
-                        // debugger
-                        console.log("I have money!")
                         if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
                             // const greenCheck = document.createElement("span")
                             // greenCheck.innerHTML = `&#10003` 
@@ -380,7 +412,12 @@ const renderGuide = (guideObj) => {
                                     }
                                     addTokenToUser(newToken)
                                         .then(returnedToken => {
-                                            renderGuideShow(selectedGuide)
+                                            getUsers(selectedUser.id)
+                                                .then(userObj => {
+                                                    selectedUser = userObj
+                                                    addWalletToNav(selectedUser)
+                                                    renderGuideShow(selectedGuide)
+                                                })
                                         })
                                 })    
                         }            
@@ -408,7 +445,6 @@ function renderGuides(guidesArray) {
             console.log(upToDateUser)
             if (upToDateUser.id) {
                 selectedUser = upToDateUser
-                console.log("hi!")
             }
             guidesArray.forEach(renderGuide)
     })
@@ -434,12 +470,9 @@ const renderGuideShow = (guideObj) => {
     const likesArea = document.createElement("div")
     likesArea.className = "likes-area"
     const likesAmount = document.createElement("p")
-    
     likesAmount.innerText = `${guideObj.likes.length} Likes`
-    
     const likeButton = document.createElement("button")
     likeButton.innerText = "Like"
-    
     likeButton.addEventListener("click", function () {
         const newLikeObj = {
             user_id: selectedUser.id,
@@ -450,10 +483,7 @@ const renderGuideShow = (guideObj) => {
                 guideObj.likes.push(returnedNewLikeObj)
                 likesAmount.innerText = `${guideObj.likes.length} Likes`
                 likeButton.disabled = true
-                
             })
-        // renderGuideShow(guideObj)
-        
     })
     const commentArea = document.createElement("div")
     commentArea.className = "comment-area"
@@ -461,15 +491,15 @@ const renderGuideShow = (guideObj) => {
     commentsLabel.innerText = "Comments"
     const commentsList = document.createElement("ul")
     commentsList.id = "comments"
+    const newP = document.createElement("p")
     if (guideObj.comments.length === 0) {
-        const newP = document.createElement("p")
         newP.innerText = "No Comments Yet"
-        commentArea.append(newP)
     } else {
         guideObj.comments.forEach((comment) => {
             const newLi = document.createElement("li")
             newLi.dataset.id = comment.id
-            newLi.innerText = `${comment.user.username} (${comment.created_at}): ${comment.comment}`
+            const date = new Date(comment.created_at).toLocaleDateString('en-US')
+            newLi.innerText = `${comment.user.username} (${date}): ${comment.comment}`
             if (selectedUser.id === comment.user.id) {
                 const deleteButton = document.createElement("button")
                 deleteButton.innerText = "X"
@@ -515,7 +545,8 @@ const renderGuideShow = (guideObj) => {
             .then(returnedNewCommentObj => {
                 const newLi = document.createElement("li")
                 newLi.dataset.id = returnedNewCommentObj.id
-                newLi.innerText = `${returnedNewCommentObj.user.username} (${returnedNewCommentObj.created_at}): ${returnedNewCommentObj.comment}`
+                const date = new Date(returnedNewCommentObj.created_at).toLocaleDateString('en-US')
+                newLi.innerText = `${returnedNewCommentObj.user.username} (${date}): ${returnedNewCommentObj.comment}`
                 if (selectedUser.id === returnedNewCommentObj.user.id) {
                     const deleteButton = document.createElement("button")
                     deleteButton.innerText = "X"
@@ -534,7 +565,7 @@ const renderGuideShow = (guideObj) => {
             })
     })
     commentForm.append(commentInput, commentSubmit)
-    commentArea.append(commentsLabel, commentsList, toggleCommentFormButton, commentForm)
+    commentArea.append(commentsLabel, newP, commentsList, toggleCommentFormButton, commentForm)
     likesArea.append(likesAmount, likeButton)
     showGuide.append(showImage, title, author, content, likesArea, commentArea)
     let likesArray = guideObj.likes.filter(like => {
@@ -596,14 +627,16 @@ const renderUserPage = (selectedUser) => {
     const guidesLabel = document.createElement("h2")
     guidesLabel.innerText = "Guides: "
     guidesBox.append(guidesLabel)
-    const walletArea = document.createElement("div")
-    walletArea.classList.add("wallet-area")
-    const wallet = document.createElement("h3")
-    wallet.innerText = "Wallet: "
-    const walletAmount = document.createElement("p")
-    walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
-    walletArea.append(wallet, walletAmount)
-    userBox.append( editButton, deleteButton, name, userImage, walletArea)
+    // const walletArea = document.createElement("div")
+    // walletArea.classList.add("wallet-area")
+    // walletArea.classList.add("right-nav-items")
+    // const wallet = document.createElement("h3")
+    // wallet.innerText = "Wallet: "
+    // const walletAmount = document.createElement("p")
+    // walletAmount.innerText = `${selectedUser.tokens.length} Tokens`
+    // walletArea.append(wallet, walletAmount)
+    userBox.append( editButton, deleteButton, name, userImage)
+    
     
     userGuideArray.forEach(function (guide) {
         
@@ -808,17 +841,17 @@ const renderNewGuideForm = () => {
         }
         createGuide(newGuideObj)
             .then(createdGuide => {
-                console.log(createdGuide)
                 selectedGuide = createdGuide
                 allGuides.push(createdGuide)
                 userGuideArray.push(createdGuide)
                 renderGuideShow(selectedGuide)
-                setTimeout(() => window.alert("Congratulations! By posting a new Guide, you've earned 1 Token!"), 1000)
+                setTimeout(() => window.alert("Congratulations! By posting a new Guide, you've earned 1 Token!"), 500)
                 const newToken = {
                     user_id: selectedUser.id
                 }
                 addTokenToUser(newToken)
                 selectedUser.tokens.push(newToken)
+                addWalletToNav(selectedUser)
                 
             })
         
