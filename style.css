@@ -235,6 +235,20 @@ form#signup-form {
     display: grid;
 }
 
+form#edit-guide-form {
+    display: grid;
+}
+
+form#edit-user-form {
+    display: grid;
+}
+
+#edit-guide-form textarea {
+    height: 290px;
+    width: 500px;
+    margin-bottom: 20px;
+}
+
 .green-check {
     color: green;
     font-size: 30px;

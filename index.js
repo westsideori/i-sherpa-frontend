@@ -241,9 +241,10 @@ navBar.addEventListener("click", function (e) {
             activateTarget(e.target)
             getUsers(selectedUser.id)
                 .then(user => {
-                    renderUserPage(user)
+                    selectedUser = user
+                    
                 })
-            
+            renderUserPage(selectedUser)
             console.log("My Profile!")
         }
     }
@@ -662,12 +663,19 @@ const renderUserPage = (selectedUser) => {
                 removeHighlight("#login")
                 renderEditGuideForm()
             } else if (e.target.id === "delete-guide-button") {
+                e.target.closest(".user-card").remove()
                 selectedGuide = guide
                 deleteGuide(selectedGuide.id)
                 allGuides = allGuides.filter(el => el.id !== guide.id)
                 selectedGuide = ""
-                replenishUser(selectedUser.id)
-                e.target.closest(".user-card").remove()
+                getUsers(selectedUser.id)
+                    .then(updatedUser => {
+                        selectedUser = updatedUser
+                        let freshGuideArray = selectedUser.guides.filter(guide => {
+                            return guide.id === userGuideCard.dataset.id
+                        })
+                        selectedUser.guides = freshGuideArray
+                    })
             } else {
                 getGuides(guide.id)
                     .then(updatedGuide => {
@@ -893,8 +901,7 @@ const renderEditGuideForm = () => {
     categoryInput.value = `${selectedGuide.category}`
     const contentLabel = document.createElement("label")
     contentLabel.innerText = "Content: "
-    const contentInput = document.createElement("input")
-    contentInput.type = "text-area"
+    const contentInput = document.createElement("TEXTAREA")
     contentInput.name = "content"
     contentInput.id = "content"
     contentInput.value = `${selectedGuide.content}`
