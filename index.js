@@ -203,10 +203,6 @@ navBar.addEventListener("click", function (e) {
             logoutUser()
             removeHighlightsFromNav()
             highlightNavItem("#home")
-            getGuides()
-                .then(guidesArray => {
-                    renderGuides(guidesArray)
-                })
             console.log("Signed out!")
         } else {
             e.preventDefault()
@@ -298,7 +294,7 @@ const replenishUser = (id) => {
 
 //Renders
 const renderGuide = (guideObj) => {
-    
+    console.log("I'm Here")
     const card = document.createElement("div")
     const title = document.createElement("h2")
     const author = document.createElement("h3")
@@ -307,102 +303,93 @@ const renderGuide = (guideObj) => {
     card.className = "card"
     card.dataset.id = guideObj.id
     if (selectedUser) {
-        if (selectedUser.purchased_guides.length > 0) {
-            
-            const filteredGuideArray = selectedUser.purchased_guides.filter(guide => {
+        console.log(selectedUser)
+            if (selectedUser.purchased_guides.length > 0) {
+                const isGuidePurchased = selectedUser.purchased_guides.find(guide => {
+                    return guide.guide_id === guideObj.id
+                })
                 
-                return guide.guide_id === guideObj.id
-            })
-            
-            if (filteredGuideArray.length > 0 && filteredGuideArray[0].guide_id === guideObj.id) {
-                const greenCheck = document.createElement("span")
-                greenCheck.innerHTML = `&#10003` 
-                greenCheck.classList.add("green-check")
-                card.append(greenCheck)
+                if (isGuidePurchased) {
+                    const greenCheck = document.createElement("span")
+                    greenCheck.innerHTML = `&#10003` 
+                    greenCheck.classList.add("green-check")
+                    card.append(greenCheck)
+                }
             }
-        }
-        getUsers(selectedUser.id)
-            .then(upToDateUser => {
-                selectedUser = upToDateUser
-                
-                card.addEventListener("click", function() {
-                    let userPurchasedGuides = selectedUser.purchased_guides.filter(guide => {
-                        return guide.guide_id === guideObj.id
-                        
-                    })
+            
+            card.addEventListener("click", function() {
+                let userPurchasedGuides = selectedUser.purchased_guides.filter(guide => {
+                    return guide.guide_id === guideObj.id
+                })
+                selectedGuide = guideObj
+                if (guideObj.user_id === selectedUser.id || userPurchasedGuides.length > 0) {
+                    renderGuideShow(guideObj)
+                } else {
                     
-                    if (guideObj.user_id === selectedUser.id || userPurchasedGuides.length > 0) {
+                    if (selectedUser.tokens.length > 1) {
                         
-                        selectedGuide = guideObj
-                        renderGuideShow(guideObj)
-                    } else {
-                        
-                        selectedGuide = guideObj
-                        if (selectedUser.tokens.length > 1) {
-                            
-                            if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
-                                selectedUser.tokens.pop()
-                                const newPurchasedGuide = {
-                                    user_id: selectedUser.id,
-                                    guide_id: selectedGuide.id
-                                }
-                                
-                                purchaseGuide(newPurchasedGuide)
-                                    .then(purchasedGuideObject => {
-                                        getGuides()
-                                            .then(guideArray => {
-                                                allGuides = guideArray
-                                            })
-                                    })
-                                removeTokenFromUser(selectedUser.tokens[0].id)
-                                    .then(removedToken => {
-                                        const newToken = {
-                                            user_id: selectedGuide.user_id
-                                        }
-                                        addTokenToUser(newToken)
-                                            .then(returnedToken => {
-                                                renderGuideShow(selectedGuide)
-                                            })
-                                    }) 
+                        if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
+                            selectedUser.tokens.pop()
+                            const newPurchasedGuide = {
+                                user_id: selectedUser.id,
+                                guide_id: selectedGuide.id
                             }
                             
-                                                   
-                        } else if (selectedUser.tokens.length === 1) {
-                            // debugger
-                            console.log("I have money!")
-                            if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
-                                // const greenCheck = document.createElement("span")
-                                // greenCheck.innerHTML = `&#10003` 
-                                // greenCheck.classList.add("green-check")
-                                // card.append(greenCheck)
-                                const newPurchasedGuide = {
-                                    user_id: selectedUser.id,
-                                    guide_id: selectedGuide.id
-                                }
-                                
-                                purchaseGuide(newPurchasedGuide)
-                                const greenCheck = document.createElement("span")
-                                greenCheck.innerHTML = `&#10003` 
-                                greenCheck.classList.add("green-check")
-                                card.append(greenCheck)
-                                removeTokenFromUser(selectedUser.tokens[0].id)
-                                    .then(removedToken => {
-                                        const newToken = {
-                                            user_id: selectedGuide.user_id
-                                        }
-                                        addTokenToUser(newToken)
-                                            .then(returnedToken => {
-                                                renderGuideShow(selectedGuide)
-                                            })
-                                    })    
-                            }            
-                        } else {
-                            console.log("No Money!")
-                            window.alert("You're out of Tokens! Write new Guides to earn more Tokens!")
+                            purchaseGuide(newPurchasedGuide)
+                                .then(purchasedGuideObject => {
+                                    getGuides()
+                                        .then(guideArray => {
+                                            allGuides = guideArray
+                                        })
+                                })
+                            removeTokenFromUser(selectedUser.tokens[0].id)
+                                .then(removedToken => {
+                                    const newToken = {
+                                        user_id: selectedGuide.user_id
+                                    }
+                                    addTokenToUser(newToken)
+                                        .then(returnedToken => {
+                                            renderGuideShow(selectedGuide)
+                                        })
+                                }) 
                         }
+                        
+                                                
+                    } else if (selectedUser.tokens.length === 1) {
+                        // debugger
+                        console.log("I have money!")
+                        if (window.confirm(`You have ${selectedUser.tokens.length} Tokens. Would you like to read this Guide for 1 Token?`)) {
+                            // const greenCheck = document.createElement("span")
+                            // greenCheck.innerHTML = `&#10003` 
+                            // greenCheck.classList.add("green-check")
+                            // card.append(greenCheck)
+                            const newPurchasedGuide = {
+                                user_id: selectedUser.id,
+                                guide_id: selectedGuide.id
+                            }
+                            
+                            purchaseGuide(newPurchasedGuide)
+                            const greenCheck = document.createElement("span")
+                            greenCheck.innerHTML = `&#10003` 
+                            greenCheck.classList.add("green-check")
+                            card.append(greenCheck)
+                            removeTokenFromUser(selectedUser.tokens[0].id)
+                                .then(removedToken => {
+                                    const newToken = {
+                                        user_id: selectedGuide.user_id
+                                    }
+                                    addTokenToUser(newToken)
+                                        .then(returnedToken => {
+                                            renderGuideShow(selectedGuide)
+                                        })
+                                })    
+                        }            
+                    } else {
+                        console.log("No Money!")
+                        window.alert("You're out of Tokens! Write new Guides to earn more Tokens!")
                     }
-                })
-        } )
+                }
+            })
     } else {
         card.addEventListener("click", function() {
             selectedGuide = ""
@@ -416,7 +403,16 @@ const renderGuide = (guideObj) => {
 
 function renderGuides(guidesArray) {
     mainBox.innerHTML = null
-    guidesArray.forEach(renderGuide)
+    getUsers(selectedUser.id)
+        .then(upToDateUser => {
+            console.log(upToDateUser)
+            if (upToDateUser.id) {
+                selectedUser = upToDateUser
+                console.log("hi!")
+            }
+            guidesArray.forEach(renderGuide)
+    })
+ 
 }
 
 const renderGuideShow = (guideObj) => {
@@ -802,7 +798,7 @@ const renderNewGuideForm = () => {
     postGuideButton.value = "Post Guide"
     newGuideForm.addEventListener("submit", (e) => {
         e.preventDefault()
-        setTimeout(window.alert("Congratulations! By posting a new Guide, you've earned 1 Token!"), 5000)
+        
         const newGuideObj = {
             user_id: selectedUser.id,
             title: e.target.title.value,
@@ -817,6 +813,7 @@ const renderNewGuideForm = () => {
                 allGuides.push(createdGuide)
                 userGuideArray.push(createdGuide)
                 renderGuideShow(selectedGuide)
+                setTimeout(() => window.alert("Congratulations! By posting a new Guide, you've earned 1 Token!"), 1000)
                 const newToken = {
                     user_id: selectedUser.id
                 }
